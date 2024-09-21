@@ -6,12 +6,12 @@ import os
 import sys
 import requests
 import subprocess
-import re
 from leveling.leveling_script import LevelingScript
 from common_functions import check_and_install_packages
 
-REPO_URL = "https://github.com/PabloPG/ragnarokorigintoolbox"
+REPO_URL = "https://api.github.com/repos/seu_usuario/seu_repositorio"
 VERSION_FILE = "version.txt"
+EXECUTABLE_NAME = "toolbox.exe"
 
 class Toolbox:
     def __init__(self, master):
@@ -26,6 +26,7 @@ class Toolbox:
         else:
             print("Arquivo de ícone não encontrado.")
 
+        self.current_version = self.get_local_version()
         self.check_for_updates()
         self.create_widgets()
 
@@ -47,6 +48,12 @@ class Toolbox:
 
         # Adicione mais abas aqui para outros scripts
 
+
+        # Label para mostrar a versão atual
+        self.version_label = tk.Label(self.master, text=f"Versão atual: {self.current_version}", 
+                                      font=('Segoe UI', 8))
+        self.version_label.grid(row=1, column=0, sticky="se", padx=5, pady=5)
+
     def check_for_updates(self):
         try:
             local_version = self.get_local_version()
@@ -57,22 +64,15 @@ class Toolbox:
                                        f"Uma nova versão ({remote_version}) está disponível. Deseja atualizar?"):
                     self.update_files()
                     messagebox.showinfo("Atualização Concluída", 
-                                        "O programa foi atualizado. Por favor, reinicie o aplicativo.")
-                    self.master.destroy()
-                    sys.exit(0)
+                                        "O programa foi atualizado. Será reiniciado agora.")
+                    self.restart_application()
         except Exception as e:
             print(f"Erro ao verificar atualizações: {e}")
-
-    def get_version_from_content(self, content):
-        match = re.search(r"FileVersion', u'(\d+\.\d+\.\d+)", content)
-        if match:
-            return match.group(1)
-        return "0.0.0"
 
     def get_local_version(self):
         if os.path.exists(VERSION_FILE):
             with open(VERSION_FILE, "r") as f:
-                return self.get_version_from_content(f.read())
+                return f.read().strip()
         return "0.0.0"
 
     def get_remote_version(self):
@@ -80,7 +80,7 @@ class Toolbox:
         if response.status_code == 200:
             content = response.json()
             file_content = requests.get(content["download_url"]).text
-            return self.get_version_from_content(file_content)
+            return file_content.strip()
         return "0.0.0"
 
     def download_file(self, file_path):
@@ -96,6 +96,14 @@ class Toolbox:
         files_to_update = ["toolbox.py", "leveling/leveling_script.py", "common_functions.py", VERSION_FILE]
         for file in files_to_update:
             self.download_file(file)
+
+    def restart_application(self):
+        if getattr(sys, 'frozen', False):
+            # Se for um executável compilado
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        else:
+            # Se for um script Python
+            os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def on_closing(self):
         # Implemente lógica de fechamento se necessário
