@@ -1,7 +1,7 @@
 # leveling/leveling_script.py
 
 import tkinter as tk
-from tkinter import ttk, scrolledtext, simpledialog
+from tkinter import ttk, scrolledtext, simpledialog, messagebox
 import threading
 import time
 from datetime import datetime
@@ -98,14 +98,25 @@ class LevelingScript:
         main_frame.rowconfigure(3, weight=1)
 
     def set_custom_key(self, index):
-        key = simpledialog.askstring("Tecla Customizável", f"Digite a tecla customizada {index + 1}:")
-        if key:
-            self.custom_keys[index] = key
-            custom_btn = getattr(self, f'custom_btn_{index}')
-            custom_btn.config(text=f"Custom {index+1}: {key}")
-            self.key_active[f'custom_{index}'] = True
-            custom_btn.configure(style='Green.TButton')
-            self.log(f"Tecla customizável {index + 1} definida como: {key}")
+        custom_btn = getattr(self, f'custom_btn_{index}')
+        key = f'custom_{index}'
+
+        if self.key_active.get(key, False):
+            # Se a tecla já estiver ativa, desative-a
+            self.key_active[key] = False
+            custom_btn.configure(style='TButton')
+            custom_btn.config(text=f"Custom {index+1}")
+            self.custom_keys[index] = None
+            self.log(f"Tecla customizada {index + 1} desativada")
+        else:
+            # Se a tecla estiver inativa, permita a seleção de uma nova tecla
+            new_key = simpledialog.askstring("Tecla Customizável", f"Digite a tecla customizada {index + 1}:")
+            if new_key:
+                self.custom_keys[index] = new_key
+                custom_btn.config(text=f"Custom {index+1}: {new_key}")
+                self.key_active[key] = True
+                custom_btn.configure(style='Green.TButton')
+                self.log(f"Tecla customizável {index + 1} definida como: {new_key}")
 
     def toggle_key(self, key):
         self.key_active[key] = not self.key_active[key]
@@ -151,6 +162,12 @@ class LevelingScript:
 
     def toggle_script(self):
         if not self.running:
+            selected_windows = self.window_manager.get_selected_windows()
+            if not selected_windows:
+                messagebox.showwarning("Nenhuma Janela Selecionada", 
+                                       "Por favor, selecione pelo menos uma janela do jogo antes de iniciar o script.")
+                return
+
             self.start_script()
         else:
             self.stop_script()
@@ -179,14 +196,13 @@ class LevelingScript:
                                 custom_key = self.custom_keys[int(key[-1])]
                                 if custom_key:
                                     send_key(window, custom_key)
+                                    self.log(f"Tecla {custom_key} pressionada em {window}")
                             else:
                                 send_key(window, key)
+                                self.log(f"Tecla {key} pressionada em {window}")
+
                             self.last_pressed[key] = current_time
 
-                            if custom_key:
-                                self.log(f"Tecla {custom_key} pressionada em {window}")
-                            else:
-                                self.log(f"Tecla {key} pressionada em {window}")
                 time.sleep(0.1)
 
         self.script_thread = threading.Thread(target=loop_script)
