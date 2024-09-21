@@ -14,7 +14,8 @@ def install(package):
 def check_and_install_packages():
     required_packages = {
         "win32gui": "pywin32",
-        "pywinauto": "pywinauto"
+        "pywinauto": "pywinauto",
+        "requests": "requests"
     }
     for module, package in required_packages.items():
         try:
