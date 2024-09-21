@@ -2,3 +2,6 @@ __pycache__/*
 dist/*
 build/*
 Ragnarok Toolbox.spec
+
+
+leveling/__pycache__/*
