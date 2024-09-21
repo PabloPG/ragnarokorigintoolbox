@@ -1,3 +1,9 @@
 Comando para gerar o executavel:
 
 python -m PyInstaller --onefile --windowed --add-data "common_functions.py;." --add-data "icon.ico;." --name "Ragnarok Toolbox" --icon=icon.ico --version-file=version_info.txt toolbox.py
+
+
+
+## Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.

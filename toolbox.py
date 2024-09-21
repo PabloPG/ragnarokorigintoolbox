@@ -9,7 +9,7 @@ import subprocess
 from leveling.leveling_script import LevelingScript
 from common_functions import check_and_install_packages
 
-REPO_URL = "https://api.github.com/repos/seu_usuario/seu_repositorio"
+REPO_URL = "https://github.com/PabloPG/ragnarokorigintoolbox"
 VERSION_FILE = "version.txt"
 EXECUTABLE_NAME = "toolbox.exe"
 
@@ -77,6 +77,7 @@ class Toolbox:
 
     def get_remote_version(self):
         response = requests.get(f"{REPO_URL}/contents/{VERSION_FILE}")
+        print(response.status_code)
         if response.status_code == 200:
             content = response.json()
             file_content = requests.get(content["download_url"]).text
